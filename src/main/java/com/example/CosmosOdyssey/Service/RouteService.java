@@ -9,6 +9,8 @@ import com.example.CosmosOdyssey.Model.TravelPricesResponse;
 import com.example.CosmosOdyssey.Repository.LegRepository;
 import com.example.CosmosOdyssey.Repository.ProvidersRepository;
 import com.example.CosmosOdyssey.Repository.RouteRepository;
+import com.example.CosmosOdyssey.Repository.TravelPricesResponseRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -27,13 +29,27 @@ public class RouteService {
     @Autowired
     private ProvidersRepository providersRepository;
 
+    @Autowired
+    private TravelPricesResponseRepository travelPricesResponseRepository;
+
     private final String apiURL = "https://cosmosodyssey.azurewebsites.net/api/v1.0/TravelPrices";
 
-    public List<RouteInfo> fetchRoutesFromApi() {
+
+    @PostConstruct                          //runs data method right on a startup
+    public void fetchRoutesFromApiOnStartup() {
+        fetchRoutesFromApi();
+    }
+
+    public List<RouteInfo> fetchRoutesFromApi() {               //Takes all data from url and writes into H2
         RestTemplate restTemplate = new RestTemplate();
         TravelPricesResponse response = restTemplate.getForObject(apiURL, TravelPricesResponse.class);
 
         if (response != null && response.getLegs() != null) {
+
+            // Accessing validUntil date
+            String validUntil = response.getValidUntil();
+            System.out.println("Price list is valid until: " + validUntil);
+
             for (Leg leg : response.getLegs()) {
                 RouteInfo routeInfo = leg.getRouteInfo();
                 routeRepository.save(routeInfo);
@@ -53,4 +69,6 @@ public class RouteService {
         }
         return routeRepository.findAll();
     }
+
+
 }

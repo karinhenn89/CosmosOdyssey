@@ -12,7 +12,6 @@ public class Leg {
     @Id
     private String id;
 
-
     @ManyToOne  // Add this mapping
     @JoinColumn(name = "route_info_id")
     private RouteInfo routeInfo;
