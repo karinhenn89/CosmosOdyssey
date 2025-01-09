@@ -9,14 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TravelPricesResponseService {
 
-    @Autowired
-    private TravelPricesResponseRepository travelPricesResponseRepository;
-    private TravelPricesResponse travelPricesResponse;
 
-
-    public void isValidData() {
-        System.out.println(travelPricesResponse.getValidUntil());
-    }
 }
 
 

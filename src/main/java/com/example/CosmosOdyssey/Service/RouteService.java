@@ -2,14 +2,8 @@ package com.example.CosmosOdyssey.Service;
 
 
 
-import com.example.CosmosOdyssey.Model.Leg;
-import com.example.CosmosOdyssey.Model.Providers;
-import com.example.CosmosOdyssey.Model.RouteInfo;
-import com.example.CosmosOdyssey.Model.TravelPricesResponse;
-import com.example.CosmosOdyssey.Repository.LegRepository;
-import com.example.CosmosOdyssey.Repository.ProvidersRepository;
-import com.example.CosmosOdyssey.Repository.RouteRepository;
-import com.example.CosmosOdyssey.Repository.TravelPricesResponseRepository;
+import com.example.CosmosOdyssey.Model.*;
+import com.example.CosmosOdyssey.Repository.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +11,10 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RouteService {
@@ -33,8 +30,8 @@ public class RouteService {
     @Autowired
     private ProvidersRepository providersRepository;
 
-    @Autowired
-    private TravelPricesResponseRepository travelPricesResponseRepository;
+//    @Autowired
+//    private Company company;
 
     private final String apiURL = "https://cosmosodyssey.azurewebsites.net/api/v1.0/TravelPrices";
 
@@ -99,4 +96,35 @@ public class RouteService {
 
     }
 
+    public List<ProviderDto> getProvidersBasedOnOriginAndDestination(String fromName, String toName) {
+        // Fetch RouteInfo based on fromName and toName
+        List<RouteInfo> routeInfos = routeRepository.findByFromNameAndToName(fromName, toName);
+        if (routeInfos.isEmpty()) {
+            return Collections.emptyList(); // No matching routes
+        }
+
+        // Extract RouteInfo IDs
+        List<String> routeInfoIds = routeInfos.stream()
+                .map(RouteInfo::getId)
+                .collect(Collectors.toList());
+
+        // Find all Leg IDs corresponding to RouteInfo IDs
+        List<Leg> legs = legRepository.findByRouteInfoIdIn(routeInfoIds);
+        List<String> legIds = legs.stream()
+                .map(Leg::getId)
+                .collect(Collectors.toList());
+
+        // Find all Providers corresponding to Leg IDs
+        List<Providers> providers = providersRepository.findByLegIdIn(legIds);
+
+        // Map Providers to ProviderDto
+        return providers.stream()
+                .map(provider -> new ProviderDto(
+                        provider.getCompany(),
+                        provider.getFlightStart(),
+                        provider.getFlightEnd(),
+                        provider.getPrice()
+                ))
+                .collect(Collectors.toList());
+    }
 }

@@ -14,13 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*")
 public class TravelPricesResponseController {
 
-    @Autowired
-    private TravelPricesResponseService travelPricesResponseService;
 
-
-    @GetMapping("/isvalid")
-    public void isValid() {
-        travelPricesResponseService.isValidData();
-    }
 
 }
