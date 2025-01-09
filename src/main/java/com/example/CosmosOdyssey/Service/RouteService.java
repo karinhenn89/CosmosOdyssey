@@ -15,10 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Service
 public class RouteService {
+
+    private String validUntil;
 
     @Autowired
     private RouteRepository routeRepository;
@@ -40,6 +44,7 @@ public class RouteService {
         fetchRoutesFromApi();
     }
 
+
     public List<RouteInfo> fetchRoutesFromApi() {               //Takes all data from url and writes into H2
         RestTemplate restTemplate = new RestTemplate();
         TravelPricesResponse response = restTemplate.getForObject(apiURL, TravelPricesResponse.class);
@@ -47,15 +52,17 @@ public class RouteService {
         if (response != null && response.getLegs() != null) {
 
             // Accessing validUntil date
-            String validUntil = response.getValidUntil();
-            System.out.println("Price list is valid until: " + validUntil);
+            this.validUntil = response.getValidUntil();
+            System.out.println("Price list is valid until: " + this.validUntil);
 
             for (Leg leg : response.getLegs()) {
                 RouteInfo routeInfo = leg.getRouteInfo();
-                routeRepository.save(routeInfo);
+
 
                 // Save Leg with its associated RouteInfo
                 leg.setRouteInfo(routeInfo);
+                routeRepository.save(routeInfo);
+
                 legRepository.save(leg);
 
                 // Save Providers for the current Leg
@@ -70,5 +77,26 @@ public class RouteService {
         return routeRepository.findAll();
     }
 
+    public String isValid() {
+
+            try {
+                ZonedDateTime priceListDate = ZonedDateTime.parse(this.validUntil);
+                System.out.println("Parsed date: " + priceListDate);
+
+            // Compare with current date and time
+            ZonedDateTime currentDateTime = ZonedDateTime.now();
+            System.out.println("Current date: " + currentDateTime);
+
+            if (priceListDate.isBefore(currentDateTime)) {
+                return "Pricelist is available.";
+            } else {
+                return "Pricelist is not available.";
+            }
+
+        } catch (DateTimeParseException e) {
+            return "Invalid date format.";
+        }
+
+    }
 
 }

@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Embeddable
 @Data
-public class Company {
+public class                               Company {
     @Column(name = "company_id")
     private String id;
     private String name;
