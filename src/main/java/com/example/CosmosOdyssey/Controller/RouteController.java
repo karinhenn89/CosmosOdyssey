@@ -36,8 +36,13 @@ public class RouteController {
     }
 
     @GetMapping("/routes/locations")
-    public Map<String, List<String>> getLocationOptions() {
-        return routeService.getLocationOptions();
+    public Map<String, List<String>> getAllLocations() {
+        return routeService.getAllFromLocations();
+    }
+
+    @GetMapping("/routes/locations/{fromName}")
+    public Map<String, List<String>> getLocationOptions(@PathVariable String fromName) {
+        return routeService.getLocationOptions(fromName);
     }
 
 }

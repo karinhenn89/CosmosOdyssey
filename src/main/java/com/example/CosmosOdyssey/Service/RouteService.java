@@ -129,10 +129,17 @@ public class RouteService {
                 )
                 .collect(Collectors.toList());
     }
-    public Map<String, List<String>> getLocationOptions() {
+    public Map<String, List<String>> getAllFromLocations() {
+        List<String> fromOptions = routeRepository.findDistinctFromNames();
+        Map<String, List<String>> allLocationOptions = new HashMap<>();
+        allLocationOptions.put("fromOptions", fromOptions);
+        return allLocationOptions;
+    }
+
+    public Map<String, List<String>> getLocationOptions(String fromName) {
         // Fetch distinct fromName and toName
         List<String> fromOptions = routeRepository.findDistinctFromNames();
-        List<String> toOptions = routeRepository.findDistinctToNames();
+        List<String> toOptions = routeRepository.findDistinctToNamesByFromName(fromName);
 
         // Create a map to hold the results
         Map<String, List<String>> locationOptions = new HashMap<>();
