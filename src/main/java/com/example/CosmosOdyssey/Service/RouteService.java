@@ -124,7 +124,9 @@ public class RouteService {
                                 provider.getFlightEnd(),
                                 provider.getPrice(),
                                 routeInfo.getFrom(),
-                                routeInfo.getTo()
+                                routeInfo.getTo(),
+                                routeInfo.getDistance()
+
                         ))
                 )
                 .collect(Collectors.toList());

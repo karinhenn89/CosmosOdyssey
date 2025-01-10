@@ -3,11 +3,15 @@ package com.example.CosmosOdyssey.Model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Entity
 @Data
+@Getter
+@Setter
 public class RouteInfo {
     @Id
     @Column(name = "route_info_id")
