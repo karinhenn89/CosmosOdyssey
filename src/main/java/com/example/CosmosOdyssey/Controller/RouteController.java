@@ -31,8 +31,11 @@ public class RouteController {
     }
 
     @GetMapping("/getproviders")
-    public List<ProviderDto> getProvidersBasedOnOriginAndDestination(@RequestBody LocationDto locationRequest){
-        return routeService.getProvidersBasedOnOriginAndDestination(locationRequest.getFromName(), locationRequest.getToName());
+    public List<ProviderDto> getProvidersBasedOnOriginAndDestination(
+            @RequestParam String fromName,
+            @RequestParam String toName) {
+
+        return routeService.getProvidersBasedOnOriginAndDestination(fromName, toName);
     }
 
     @GetMapping("/routes/locations")
