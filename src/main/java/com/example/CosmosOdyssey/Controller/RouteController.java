@@ -1,20 +1,20 @@
 package com.example.CosmosOdyssey.Controller;
 
 
+import com.example.CosmosOdyssey.Model.LocationDto;
+import com.example.CosmosOdyssey.Model.ProviderDto;
 import com.example.CosmosOdyssey.Model.RouteInfo;
-import com.example.CosmosOdyssey.Model.TravelPricesResponse;
+
 import com.example.CosmosOdyssey.Service.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:8080")
 public class RouteController {
 
     @Autowired
@@ -29,4 +29,15 @@ public class RouteController {
     public String isValidDate () {
         return routeService.isValid();
     }
+
+    @GetMapping("/getproviders")
+    public List<ProviderDto> getProvidersBasedOnOriginAndDestination(@RequestBody LocationDto locationRequest){
+        return routeService.getProvidersBasedOnOriginAndDestination(locationRequest.getFromName(), locationRequest.getToName());
+    }
+
+    @GetMapping("/routes/locations")
+    public Map<String, List<String>> getLocationOptions() {
+        return routeService.getLocationOptions();
+    }
+
 }

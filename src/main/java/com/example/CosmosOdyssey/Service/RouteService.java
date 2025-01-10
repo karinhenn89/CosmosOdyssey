@@ -11,9 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -119,12 +117,28 @@ public class RouteService {
 
         // Map Providers to ProviderDto
         return providers.stream()
-                .map(provider -> new ProviderDto(
-                        provider.getCompany(),
-                        provider.getFlightStart(),
-                        provider.getFlightEnd(),
-                        provider.getPrice()
-                ))
+                .flatMap(provider -> routeInfos.stream()
+                        .map(routeInfo -> new ProviderDto(
+                                provider.getCompany(),
+                                provider.getFlightStart(),
+                                provider.getFlightEnd(),
+                                provider.getPrice(),
+                                routeInfo.getFrom(),
+                                routeInfo.getTo()
+                        ))
+                )
                 .collect(Collectors.toList());
+    }
+    public Map<String, List<String>> getLocationOptions() {
+        // Fetch distinct fromName and toName
+        List<String> fromOptions = routeRepository.findDistinctFromNames();
+        List<String> toOptions = routeRepository.findDistinctToNames();
+
+        // Create a map to hold the results
+        Map<String, List<String>> locationOptions = new HashMap<>();
+        locationOptions.put("fromOptions", fromOptions);
+        locationOptions.put("toOptions", toOptions);
+
+        return locationOptions;
     }
 }
