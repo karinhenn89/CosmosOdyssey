@@ -50,6 +50,7 @@ public class RouteService {
             this.validUntil = response.getValidUntil();
             System.out.println("Price list is valid until: " + this.validUntil);
 
+
             for (Leg leg : response.getLegs()) {
                 RouteInfo routeInfo = leg.getRouteInfo();
 

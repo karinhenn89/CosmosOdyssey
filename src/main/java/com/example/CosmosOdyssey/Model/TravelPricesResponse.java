@@ -10,6 +10,7 @@ import java.util.List;
             //Wrapper class
 @Data
 @Entity
+@Table(name= "travel_prices_response")
 @Getter
 @Setter
 public class TravelPricesResponse {
