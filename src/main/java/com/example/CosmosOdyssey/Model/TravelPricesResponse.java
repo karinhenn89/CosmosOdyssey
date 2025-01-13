@@ -15,13 +15,12 @@ import java.util.List;
 @Setter
 public class TravelPricesResponse {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "price_list_id", nullable = false)
     private String id;
 
-    @Column(name = "validUntil")
+    @Column(name = "valid_Until")
     private String validUntil;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "leg_id")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "travelPricesResponse")
     private List<Leg> legs;
 }

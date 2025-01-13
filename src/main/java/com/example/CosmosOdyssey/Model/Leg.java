@@ -18,4 +18,9 @@ public class Leg {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy ="leg" )
     private List<Providers> providers;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "travel_prices_list_id", nullable = false) // Reference TravelPricesResponse
+    private TravelPricesResponse travelPricesResponse;
+
 }

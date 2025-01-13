@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class RouteService {
 
     private String validUntil;
+    private String id;
 
     @Autowired
     private RouteRepository routeRepository;
@@ -27,6 +28,9 @@ public class RouteService {
 
     @Autowired
     private ProvidersRepository providersRepository;
+
+    @Autowired
+    private TravelPricesResponseRepository travelPricesResponseRepository;
 
 //    @Autowired
 //    private Company company;
@@ -48,15 +52,28 @@ public class RouteService {
 
             // Accessing validUntil date
             this.validUntil = response.getValidUntil();
-            System.out.println("Price list is valid until: " + this.validUntil);
+            this.id = response.getId();
 
+            System.out.println("Price list is valid until: " + this.validUntil + " id: " + this.id);
+
+            if (this.id == null || this.id.isEmpty()) {
+                throw new IllegalStateException("ID from API response is null or empty");
+            }
+            // Save TravelPricesResponse
+            TravelPricesResponse travelPricesEntity = new TravelPricesResponse();
+            travelPricesEntity.setId(this.id); // Ensure ID is set
+            travelPricesEntity.setValidUntil(this.validUntil);
+            System.out.println("Saving TravelPricesResponse with ID: " + travelPricesEntity.getId());
+            travelPricesResponseRepository.save(travelPricesEntity);
 
             for (Leg leg : response.getLegs()) {
                 RouteInfo routeInfo = leg.getRouteInfo();
 
-
                 // Save Leg with its associated RouteInfo
                 leg.setRouteInfo(routeInfo);
+
+                leg.setTravelPricesResponse(travelPricesEntity);
+
                 routeRepository.save(routeInfo);
 
                 legRepository.save(leg);
