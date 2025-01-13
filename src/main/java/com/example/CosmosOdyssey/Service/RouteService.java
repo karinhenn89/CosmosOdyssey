@@ -6,6 +6,8 @@ import com.example.CosmosOdyssey.Model.*;
 import com.example.CosmosOdyssey.Repository.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -54,11 +56,33 @@ public class RouteService {
             if (this.id == null || this.id.isEmpty()) {
                 throw new IllegalStateException("ID from API response is null or empty");
             }
-            // Save TravelPricesResponse
-            TravelPricesResponse travelPricesEntity = new TravelPricesResponse();
-            travelPricesEntity.setId(this.id); // Ensure ID is set
-            travelPricesEntity.setValidUntil(this.validUntil);
-            System.out.println("Saving TravelPricesResponse with ID: " + travelPricesEntity.getId());
+
+            // Check if pricelist already exists and is soft-deleted
+            Optional<TravelPricesResponse> existingPricelist = travelPricesResponseRepository.findActiveById(this.id);
+
+
+            TravelPricesResponse travelPricesEntity;
+            if (existingPricelist.isPresent()) {
+                // Update existing pricelist if found
+                travelPricesEntity = existingPricelist.get();
+                travelPricesEntity.setValidUntil(this.validUntil);
+            } else {
+                // Save new pricelist
+                travelPricesEntity = new TravelPricesResponse();
+                travelPricesEntity.setId(this.id);
+                travelPricesEntity.setValidUntil(this.validUntil);
+
+                // Check for more than 15 active pricelists and soft-delete the oldest ones
+                long activeCount = travelPricesResponseRepository.count();
+                if (activeCount >= 15) {
+                    Pageable pageable = PageRequest.of(0, (int) (activeCount - 14)); // Keep only 14 active pricelists
+                    List<TravelPricesResponse> oldestPricelists = travelPricesResponseRepository.findAllActivePricelists((java.awt.print.Pageable) pageable);
+                    for (TravelPricesResponse oldest : oldestPricelists) {
+                        travelPricesResponseRepository.softDeleteById(oldest.getId());
+                    }
+                }
+            }
+
             travelPricesResponseRepository.save(travelPricesEntity);
 
             for (Leg leg : response.getLegs()) {

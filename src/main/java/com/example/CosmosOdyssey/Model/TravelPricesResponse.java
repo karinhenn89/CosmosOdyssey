@@ -23,4 +23,9 @@ public class TravelPricesResponse {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "travelPricesResponse")
     private List<Leg> legs;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+
 }
