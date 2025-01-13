@@ -32,17 +32,12 @@ public class RouteService {
     @Autowired
     private TravelPricesResponseRepository travelPricesResponseRepository;
 
-//    @Autowired
-//    private Company company;
-
     private final String apiURL = "https://cosmosodyssey.azurewebsites.net/api/v1.0/TravelPrices";
-
 
     @PostConstruct                          //runs data method right on a startup
     public void fetchRoutesFromApiOnStartup() {
         fetchRoutesFromApi();
     }
-
 
     public List<RouteInfo> fetchRoutesFromApi() {               //Takes all data from url and writes into H2
         RestTemplate restTemplate = new RestTemplate();
