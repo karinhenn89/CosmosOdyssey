@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,5 +24,6 @@ public interface TravelPricesResponseRepository extends JpaRepository<TravelPric
 
     @Query("SELECT t FROM TravelPricesResponse t WHERE t.deleted = false AND t.id = :id")
     Optional<TravelPricesResponse> findActiveById(@Param("id") String id);
+
 
 }

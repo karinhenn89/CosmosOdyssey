@@ -25,11 +25,6 @@ public class RouteController {
         return routeService.fetchRoutesFromApi();
     }
 
-    @GetMapping("/is-valid")
-    public String isValidDate () {
-        return routeService.isValid();
-    }
-
     @GetMapping("/getproviders")
     public List<ProviderDto> getProvidersBasedOnOriginAndDestination(
             @RequestParam String fromName,

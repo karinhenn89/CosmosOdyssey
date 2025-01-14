@@ -11,8 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +31,9 @@ public class RouteService {
 
     @Autowired
     private TravelPricesResponseRepository travelPricesResponseRepository;
+
+    @Autowired
+    TravelPricesResponseService travelPricesResponseService;
 
     private final String apiURL = "https://cosmosodyssey.azurewebsites.net/api/v1.0/TravelPrices";
 
@@ -76,7 +77,7 @@ public class RouteService {
                 long activeCount = travelPricesResponseRepository.count();
                 if (activeCount >= 15) {
                     Pageable pageable = PageRequest.of(0, (int) (activeCount - 14)); // Keep only 14 active pricelists
-                    List<TravelPricesResponse> oldestPricelists = travelPricesResponseRepository.findAllActivePricelists((java.awt.print.Pageable) pageable);
+                    List<TravelPricesResponse> oldestPricelists = travelPricesResponseRepository.findAllActivePricelists(pageable);
                     for (TravelPricesResponse oldest : oldestPricelists) {
                         travelPricesResponseRepository.softDeleteById(oldest.getId());
                     }
@@ -109,28 +110,6 @@ public class RouteService {
         return routeRepository.findAll();
     }
 
-    public String isValid() {
-
-            try {
-                ZonedDateTime priceListDate = ZonedDateTime.parse(this.validUntil);
-                System.out.println("Parsed date: " + priceListDate);
-
-            // Compare with current date and time
-            ZonedDateTime currentDateTime = ZonedDateTime.now();
-            System.out.println("Current date: " + currentDateTime);
-
-            if (priceListDate.isBefore(currentDateTime)) {
-                return "Pricelist is available.";
-            } else {
-                return "Pricelist is not available.";
-            }
-
-        } catch (DateTimeParseException e) {
-            return "Invalid date format.";
-        }
-
-    }
-
     public List<ProviderDto> getProvidersBasedOnOriginAndDestination(String fromName, String toName) {
         // Fetch RouteInfo based on fromName and toName
         List<RouteInfo> routeInfos = routeRepository.findByFromNameAndToName(fromName, toName);
@@ -138,23 +117,33 @@ public class RouteService {
             return Collections.emptyList(); // No matching routes
         }
 
-        // Extract RouteInfo IDs
-        List<String> routeInfoIds = routeInfos.stream()
+        // Get the latest valid price list
+        TravelPricesResponse latestPriceList = travelPricesResponseService.getLatestValidPricelist();
+
+        // Extract Legs from the latest price list
+        List<Leg> validLegs = latestPriceList.getLegs();
+
+        // Filter Legs to include only those that match the given RouteInfo
+        Set<String> validRouteInfoIds = routeInfos.stream()
                 .map(RouteInfo::getId)
+                .collect(Collectors.toSet());
+
+        List<Leg> filteredLegs = validLegs.stream()
+                .filter(leg -> validRouteInfoIds.contains(leg.getRouteInfo().getId()))
                 .collect(Collectors.toList());
 
-        // Find all Leg IDs corresponding to RouteInfo IDs
-        List<Leg> legs = legRepository.findByRouteInfoIdIn(routeInfoIds);
-        List<String> legIds = legs.stream()
+        // Extract Leg IDs for filtering Providers
+        List<String> validLegIds = filteredLegs.stream()
                 .map(Leg::getId)
                 .collect(Collectors.toList());
 
-        // Find all Providers corresponding to Leg IDs
-        List<Providers> providers = providersRepository.findByLegIdIn(legIds);
+        // Find Providers corresponding to the filtered Legs
+        List<Providers> providers = providersRepository.findByLegIdIn(validLegIds);
 
         // Map Providers to ProviderDto
         return providers.stream()
                 .flatMap(provider -> routeInfos.stream()
+                        .filter(routeInfo -> routeInfo.getId().equals(provider.getLeg().getRouteInfo().getId()))
                         .map(routeInfo -> new ProviderDto(
                                 provider.getCompany(),
                                 provider.getFlightStart(),
@@ -163,11 +152,11 @@ public class RouteService {
                                 routeInfo.getFrom(),
                                 routeInfo.getTo(),
                                 routeInfo.getDistance()
-
                         ))
                 )
                 .collect(Collectors.toList());
     }
+
     public Map<String, List<String>> getAllFromLocations() {
         List<String> fromOptions = routeRepository.findDistinctFromNames();
         Map<String, List<String>> allLocationOptions = new HashMap<>();
