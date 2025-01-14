@@ -117,10 +117,12 @@ public class RouteService {
                 travelPricesEntity.setValidUntil(this.validUntil);
 
                 // Check for more than 15 active pricelists and soft-delete the oldest ones
-                long activeCount = travelPricesResponseRepository.count();
-                if (activeCount >= 15) {
-                    Pageable pageable = PageRequest.of(0, (int) (activeCount - 14)); // Keep only 14 active pricelists
+                long activeCount = travelPricesResponseRepository.countActivePricelists();
+                if (activeCount > 14) {
+                    int deleteCount = (int) (activeCount - 14);
+                    Pageable pageable = PageRequest.of(0, deleteCount);
                     List<TravelPricesResponse> oldestPricelists = travelPricesResponseRepository.findAllActivePricelists(pageable);
+
                     for (TravelPricesResponse oldest : oldestPricelists) {
                         travelPricesResponseRepository.softDeleteById(oldest.getId());
                     }

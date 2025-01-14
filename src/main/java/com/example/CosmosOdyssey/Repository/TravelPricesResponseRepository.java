@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface TravelPricesResponseRepository extends JpaRepository<TravelPricesResponse, String> {
-    @Query("SELECT t FROM TravelPricesResponse t WHERE t.deleted = false ORDER BY t.validUntil ASC")
+    @Query("SELECT t FROM TravelPricesResponse t WHERE t.deleted = false ORDER BY t.validUntil DESC")
     List<TravelPricesResponse> findAllActivePricelists(Pageable pageable);
 
     @Modifying
@@ -24,6 +24,9 @@ public interface TravelPricesResponseRepository extends JpaRepository<TravelPric
 
     @Query("SELECT t FROM TravelPricesResponse t WHERE t.deleted = false AND t.id = :id")
     Optional<TravelPricesResponse> findActiveById(@Param("id") String id);
+
+    @Query("SELECT COUNT(t) FROM TravelPricesResponse t WHERE t.deleted = false")
+    long countActivePricelists();
 
     TravelPricesResponse findTopByOrderByValidUntilDesc();
 

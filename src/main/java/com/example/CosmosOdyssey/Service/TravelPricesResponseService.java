@@ -24,7 +24,7 @@ public class TravelPricesResponseService {
 
     public TravelPricesResponse getLatestValidPricelist() {
         // Fetch all active pricelists using the existing repository method
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("validUntil").descending());
+        Pageable pageable = PageRequest.of(0, 15, Sort.by("validUntil").descending());
         List<TravelPricesResponse> pricelists = travelPricesResponseRepository.findAllActivePricelists(pageable);
 
         // Filter for the first valid pricelist
