@@ -25,5 +25,6 @@ public interface TravelPricesResponseRepository extends JpaRepository<TravelPric
     @Query("SELECT t FROM TravelPricesResponse t WHERE t.deleted = false AND t.id = :id")
     Optional<TravelPricesResponse> findActiveById(@Param("id") String id);
 
+    TravelPricesResponse findTopByOrderByValidUntilDesc();
 
 }

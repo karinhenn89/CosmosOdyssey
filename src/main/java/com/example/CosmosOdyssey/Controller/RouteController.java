@@ -1,7 +1,6 @@
 package com.example.CosmosOdyssey.Controller;
 
 
-import com.example.CosmosOdyssey.Model.LocationDto;
 import com.example.CosmosOdyssey.Model.ProviderDto;
 import com.example.CosmosOdyssey.Model.RouteInfo;
 
@@ -39,8 +38,8 @@ public class RouteController {
     }
 
     @GetMapping("/routes/locations/{fromName}")
-    public Map<String, List<String>> getLocationOptions(@PathVariable String fromName) {
-        return routeService.getLocationOptions(fromName);
+    public Map<String, List<String>> getLocationFromOptionsTo(@PathVariable String fromName) {
+        return routeService.getLocationFromOptionsTo(fromName);
     }
 
 }

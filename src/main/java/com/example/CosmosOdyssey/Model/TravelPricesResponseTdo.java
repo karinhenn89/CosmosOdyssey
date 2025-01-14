@@ -27,6 +27,7 @@ public class TravelPricesResponseTdo {
     private String flightEnd;
     private double price;
 
+
     public TravelPricesResponseTdo(TravelPricesResponse travelPricesResponse,Leg leg, RouteInfo routeInfo, Location location, Company company, Providers provider) {
         this.id = travelPricesResponse.getId();
         this.validUntil = travelPricesResponse.getValidUntil();

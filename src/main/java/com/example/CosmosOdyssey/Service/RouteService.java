@@ -8,9 +8,12 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +44,46 @@ public class RouteService {
     public void fetchRoutesFromApiOnStartup() {
         fetchRoutesFromApi();
     }
+
+    @Scheduled(fixedRate = 60000) // This checks every minute (adjust as needed)
+    public void checkAndUpdatePriceList() {
+
+        System.out.println("Scheduled task executed at: " + Instant.now());
+
+        TravelPricesResponse travelPricesResponse = travelPricesResponseRepository.findTopByOrderByValidUntilDesc(); // Fetch the last price list data
+
+        if (travelPricesResponse != null && !travelPricesResponse.isDeleted()) {
+            try {
+
+                Instant validUntilInstant = OffsetDateTime.parse(travelPricesResponse.getValidUntil()).toInstant();
+                Instant now = Instant.now();
+
+                // Debug logs
+                System.out.println("ValidUntil: " + validUntilInstant);
+                System.out.println("Now: " + now);
+
+                // Check if the validUntil time has passed
+                if (now.isAfter(validUntilInstant)) {
+                    System.out.println("ValidUntil expired. Refreshing data...");
+                    refreshPriceListData();
+                } else {
+                    System.out.println("ValidUntil not expired. No refresh needed.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("No valid TravelPricesResponse found or it is marked as deleted.");
+        }
+
+    }
+
+    // Method to refresh price list data by calling the URL API
+    private void refreshPriceListData() {
+        fetchRoutesFromApi();
+    }
+
+
 
     public List<RouteInfo> fetchRoutesFromApi() {               //Takes all data from url and writes into H2
         RestTemplate restTemplate = new RestTemplate();
@@ -120,6 +163,9 @@ public class RouteService {
         // Get the latest valid price list
         TravelPricesResponse latestPriceList = travelPricesResponseService.getLatestValidPricelist();
 
+        String validUntil = latestPriceList.getValidUntil();
+
+
         // Extract Legs from the latest price list
         List<Leg> validLegs = latestPriceList.getLegs();
 
@@ -151,21 +197,22 @@ public class RouteService {
                                 provider.getPrice(),
                                 routeInfo.getFrom(),
                                 routeInfo.getTo(),
-                                routeInfo.getDistance()
+                                routeInfo.getDistance(),
+                                validUntil
+
                         ))
                 )
                 .collect(Collectors.toList());
     }
-
+    //Get all locations FROM planets
     public Map<String, List<String>> getAllFromLocations() {
         List<String> fromOptions = routeRepository.findDistinctFromNames();
         Map<String, List<String>> allLocationOptions = new HashMap<>();
         allLocationOptions.put("fromOptions", fromOptions);
         return allLocationOptions;
     }
-
-    public Map<String, List<String>> getLocationOptions(String fromName) {
-        // Fetch distinct fromName and toName
+    //fetch toName according to From
+    public Map<String, List<String>> getLocationFromOptionsTo(String fromName) {
         List<String> fromOptions = routeRepository.findDistinctFromNames();
         List<String> toOptions = routeRepository.findDistinctToNamesByFromName(fromName);
 
