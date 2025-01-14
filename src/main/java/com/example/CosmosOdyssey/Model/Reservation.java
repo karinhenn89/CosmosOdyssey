@@ -1,21 +1,37 @@
 package com.example.CosmosOdyssey.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
 
 @Entity
+@Getter
+@Setter
 public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "reservation_id")
     private Long id;
 
     private String firstName;
     private String lastName;
-    private String routes;
+
+    @ElementCollection
+    private List<String> routes;
+
     private double totalQuotedPrice;
-    private long totalQuotedTravelTime;
-    private String transportationCompanyNames;
+    private String totalQuotedTravelTime;
+
+    @ElementCollection
+    private List<String> companyNames;
+
+    private String validUntil;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    //@JoinColumn(name = "price_list_id", nullable = false)
+    private TravelPricesResponse travelPricesResponse;
+
 }
