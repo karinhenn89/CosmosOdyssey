@@ -30,8 +30,6 @@ public class Reservation {
 
     private String validUntil;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "price_list_id", nullable = false)
-    private TravelPricesResponse travelPricesResponse;
+
 
 }

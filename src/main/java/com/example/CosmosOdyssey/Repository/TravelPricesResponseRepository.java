@@ -30,4 +30,7 @@ public interface TravelPricesResponseRepository extends JpaRepository<TravelPric
 
     TravelPricesResponse findTopByOrderByValidUntilDesc();
 
+    // Query to find TravelPricesResponses that are deleted and have a validUntil date before the current date
+    List<TravelPricesResponse> findByDeletedTrueAndValidUntilBefore(String validUntilDate);
+
 }

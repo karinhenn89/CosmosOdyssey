@@ -39,6 +39,8 @@ public class RouteService {
     TravelPricesResponseService travelPricesResponseService;
 
     private final String apiURL = "https://cosmosodyssey.azurewebsites.net/api/v1.0/TravelPrices";
+    @Autowired
+    private ReservationService reservationService;
 
     @PostConstruct                          //runs data method right on a startup
     public void fetchRoutesFromApiOnStartup() {
@@ -81,6 +83,7 @@ public class RouteService {
     // Method to refresh price list data by calling the URL API
     private void refreshPriceListData() {
         fetchRoutesFromApi();
+        reservationService.deleteExpiredReservations();
     }
 
 
