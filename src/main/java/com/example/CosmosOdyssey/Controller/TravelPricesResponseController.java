@@ -2,7 +2,6 @@ package com.example.CosmosOdyssey.Controller;
 
 
 import com.example.CosmosOdyssey.Model.TravelPricesResponse;
-import com.example.CosmosOdyssey.Repository.TravelPricesResponseRepository;
 import com.example.CosmosOdyssey.Service.TravelPricesResponseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
