@@ -30,6 +30,4 @@ public class Reservation {
 
     private String validUntil;
 
-
-
 }
