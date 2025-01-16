@@ -2,9 +2,9 @@ package com.example.CosmosOdyssey.Repository;
 
 import com.example.CosmosOdyssey.Model.Leg;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
+@Repository
 public interface LegRepository extends JpaRepository<Leg, String> {
-    List<Leg> findByRouteInfoIdIn(List<String> routeInfoIds);
+
 }

@@ -1,7 +1,5 @@
 package com.example.CosmosOdyssey.Service;
 
-
-
 import com.example.CosmosOdyssey.Model.*;
 import com.example.CosmosOdyssey.Repository.*;
 import jakarta.annotation.PostConstruct;
@@ -47,7 +45,7 @@ public class RouteService {
         fetchRoutesFromApi();
     }
 
-    @Scheduled(fixedRate = 60000) // This checks every minute (adjust as needed)
+    @Scheduled(fixedRate = 60000) // This checks every minute (pricelists changeing every 15.29.xx, maybe to change this scheduling date longer?)
     public void checkAndUpdatePriceList() {
 
         System.out.println("Scheduled task executed at: " + Instant.now());
@@ -77,16 +75,27 @@ public class RouteService {
         } else {
             System.out.println("No valid TravelPricesResponse found or it is marked as deleted.");
         }
+    }
 
+    public void softDeleteExpiredPriceLists() {
+        long activeCount = travelPricesResponseRepository.countActivePricelists();
+        if (activeCount > 15) {
+            int deleteCount = (int) (activeCount - 15);
+            Pageable pageable = PageRequest.of(0, deleteCount);
+            List<TravelPricesResponse> oldestPricelists = travelPricesResponseRepository.findAllActivePricelists(pageable);
+
+            for (TravelPricesResponse oldest : oldestPricelists) {
+                travelPricesResponseRepository.softDeleteById(oldest.getId());
+            }
+        }
     }
 
     // Method to refresh price list data by calling the URL API
     private void refreshPriceListData() {
         fetchRoutesFromApi();
+        softDeleteExpiredPriceLists();
         reservationService.deleteExpiredReservations();
     }
-
-
 
     public List<RouteInfo> fetchRoutesFromApi() {               //Takes all data from url and writes into H2
         RestTemplate restTemplate = new RestTemplate();
@@ -107,7 +116,6 @@ public class RouteService {
             // Check if pricelist already exists and is soft-deleted
             Optional<TravelPricesResponse> existingPricelist = travelPricesResponseRepository.findActiveById(this.id);
 
-
             TravelPricesResponse travelPricesEntity;
             if (existingPricelist.isPresent()) {
                 // Update existing pricelist if found
@@ -118,20 +126,7 @@ public class RouteService {
                 travelPricesEntity = new TravelPricesResponse();
                 travelPricesEntity.setId(this.id);
                 travelPricesEntity.setValidUntil(this.validUntil);
-
-                // Check for more than 15 active pricelists and soft-delete the oldest ones
-                long activeCount = travelPricesResponseRepository.countActivePricelists();
-                if (activeCount > 14) {
-                    int deleteCount = (int) (activeCount - 14);
-                    Pageable pageable = PageRequest.of(0, deleteCount);
-                    List<TravelPricesResponse> oldestPricelists = travelPricesResponseRepository.findAllActivePricelists(pageable);
-
-                    for (TravelPricesResponse oldest : oldestPricelists) {
-                        travelPricesResponseRepository.softDeleteById(oldest.getId());
-                    }
-                }
             }
-
             travelPricesResponseRepository.save(travelPricesEntity);
 
             for (Leg leg : response.getLegs()) {
@@ -169,7 +164,6 @@ public class RouteService {
         TravelPricesResponse latestPriceList = travelPricesResponseService.getLatestValidPricelist();
 
         String validUntil = latestPriceList.getValidUntil();
-
 
         // Extract Legs from the latest price list
         List<Leg> validLegs = latestPriceList.getLegs();
@@ -209,6 +203,7 @@ public class RouteService {
                 )
                 .collect(Collectors.toList());
     }
+
     //Get all locations FROM planets
     public Map<String, List<String>> getAllFromLocations() {
         List<String> fromOptions = routeRepository.findDistinctFromNames();
@@ -216,6 +211,7 @@ public class RouteService {
         allLocationOptions.put("fromOptions", fromOptions);
         return allLocationOptions;
     }
+
     //fetch toName according to From
     public Map<String, List<String>> getLocationFromOptionsTo(String fromName) {
         List<String> fromOptions = routeRepository.findDistinctFromNames();

@@ -15,7 +15,6 @@ public class ReservationController {
     @Autowired
     private ReservationService reservationService;
 
-
     @PostMapping("/add")
     public ResponseEntity<Reservation> creatReservation(@RequestBody Reservation reservation) {
         return ResponseEntity.ok(reservationService.saveReservation(reservation));
@@ -25,7 +24,5 @@ public class ReservationController {
     public List<Reservation> getAllReservations() {
         return reservationService.getAllReservations();
     }
-
-
 
 }
