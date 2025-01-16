@@ -1,5 +1,7 @@
 package com.example.CosmosOdyssey.Config;
 
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -7,12 +9,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         // Allow CORS for frontend
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:8080")  // Adjust frontend URL if needed
+                .allowedOrigins("https://cosmos-odyseyy-ui-a518c477f6ff.herokuapp.com")  // Adjust frontend URL if needed
                 .allowedMethods("GET", "POST", "DELETE", "OPTIONS")
                 .allowedHeaders("Content-Type");
+
     }
 }
