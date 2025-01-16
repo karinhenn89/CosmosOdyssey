@@ -16,7 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         // Allow CORS for frontend
         registry.addMapping("/api/**")
-                .allowedOrigins("https://cosmos-odyseyy-ui-a518c477f6ff.herokuapp.com")  // Adjust frontend URL if needed
+                .allowedOrigins(frontendUrl)  // Adjust frontend URL if needed
                 .allowedMethods("GET", "POST", "DELETE", "OPTIONS")
                 .allowedHeaders("Content-Type");
 
