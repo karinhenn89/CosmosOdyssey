@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/routes")
 @CrossOrigin(origins = "*")
 public class RouteController {
 
@@ -32,12 +32,12 @@ public class RouteController {
         return routeService.getProvidersBasedOnOriginAndDestination(fromName, toName);
     }
 
-    @GetMapping("/routes/locations")
+    @GetMapping("/locations")
     public Map<String, List<String>> getAllLocations() {
         return routeService.getAllFromLocations();
     }
 
-    @GetMapping("/routes/locations/{fromName}")
+    @GetMapping("/locations/{fromName}")
     public Map<String, List<String>> getLocationFromOptionsTo(@PathVariable String fromName) {
         return routeService.getLocationFromOptionsTo(fromName);
     }

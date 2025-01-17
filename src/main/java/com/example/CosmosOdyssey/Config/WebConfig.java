@@ -17,7 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
         // Allow CORS for frontend
         registry.addMapping("/api/**")
                 .allowedOrigins(frontendUrl)  // Adjust frontend URL if needed
-                .allowedMethods("GET", "POST", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("Content-Type");
 
     }
